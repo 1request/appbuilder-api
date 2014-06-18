@@ -1,6 +1,11 @@
 express     = require 'express'
-app         = express()
 bodyParser  = require 'body-parser'
+mongoose    = require 'mongoose'
+Log         = require './app/models/log'
+
+app = express()
+
+mongoose.connect 'mongodb://localhost:3001/meteor'
 
 app.use bodyParser()
 
