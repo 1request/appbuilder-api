@@ -50,15 +50,18 @@ router.route '/mobile_apps/:appKey'
 
     getTags = (mobileApp) ->
       tags = mobileApp.tags
-      Tag
-        .find({_id: { $in: tags } })
-        .lean()
-        .exec (error, tags) ->
-          if error
-            res.send error
-          else
-            beaconIds = _.uniq(_.flatten(_.pluck tags, 'beacons'))
-            getBeacons(beaconIds)
+      if tags
+        Tag
+          .find({_id: { $in: tags } })
+          .lean()
+          .exec (error, tags) ->
+            if error
+              res.send error
+            else
+              beaconIds = _.uniq(_.flatten(_.pluck tags, 'beacons'))
+              getBeacons(beaconIds)
+      else
+        res.json({message: 'no beacon is set for this app'})
 
     getBeacons = (beacons) ->
       Beacon
@@ -66,7 +69,7 @@ router.route '/mobile_apps/:appKey'
         .lean()
         .select('uuid major minor -_id')
         .exec (error, beacons) ->
-          if error then res.send error then res.json { beacons: beacons }
+          if error then res.send error else res.json { beacons: beacons }
 
     getMobileApp()
 

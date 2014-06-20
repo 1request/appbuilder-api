@@ -76,19 +76,25 @@
     getTags = function(mobileApp) {
       var tags;
       tags = mobileApp.tags;
-      return Tag.find({
-        _id: {
-          $in: tags
-        }
-      }).lean().exec(function(error, tags) {
-        var beaconIds;
-        if (error) {
-          return res.send(error);
-        } else {
-          beaconIds = _.uniq(_.flatten(_.pluck(tags, 'beacons')));
-          return getBeacons(beaconIds);
-        }
-      });
+      if (tags) {
+        return Tag.find({
+          _id: {
+            $in: tags
+          }
+        }).lean().exec(function(error, tags) {
+          var beaconIds;
+          if (error) {
+            return res.send(error);
+          } else {
+            beaconIds = _.uniq(_.flatten(_.pluck(tags, 'beacons')));
+            return getBeacons(beaconIds);
+          }
+        });
+      } else {
+        return res.json({
+          message: 'no beacon is set for this app'
+        });
+      }
     };
     getBeacons = function(beacons) {
       return Beacon.find({
@@ -96,9 +102,13 @@
           $in: beacons
         }
       }).lean().select('uuid major minor -_id').exec(function(error, beacons) {
-        return res.json({
-          beacons: beacons
-        });
+        if (error) {
+          return res.send(error);
+        } else {
+          return res.json({
+            beacons: beacons
+          });
+        }
       });
     };
     return getMobileApp();
