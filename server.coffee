@@ -8,7 +8,7 @@ Tag         = require './app/models/tag'
 _           = require 'lodash-node'
 app = express()
 
-mongoose.connect 'mongodb://localhost:3001/meteor'
+mongoose.connect 'mongodb://localhost:27017/meteor-test'
 
 app.use bodyParser.urlencoded()
 app.use bodyParser.json()
