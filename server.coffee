@@ -46,7 +46,7 @@ router.route '/mobile_apps/:appKey'
         .findOne({ appKey: req.params.appKey })
         .lean()
         .exec (error, mobileApp) ->
-          getTags(mobileApp)
+          if error then res.send error else getTags(mobileApp)
 
     getTags = (mobileApp) ->
       tags = mobileApp.tags
@@ -54,8 +54,11 @@ router.route '/mobile_apps/:appKey'
         .find({_id: { $in: tags } })
         .lean()
         .exec (error, tags) ->
-          beaconIds = _.uniq(_.flatten(_.pluck tags, 'beacons'))
-          getBeacons(beaconIds)
+          if error
+            res.send error
+          else
+            beaconIds = _.uniq(_.flatten(_.pluck tags, 'beacons'))
+            getBeacons(beaconIds)
 
     getBeacons = (beacons) ->
       Beacon
@@ -63,7 +66,7 @@ router.route '/mobile_apps/:appKey'
         .lean()
         .select('uuid major minor -_id')
         .exec (error, beacons) ->
-          res.json { beacons: beacons }
+          if error then res.send error then res.json { beacons: beacons }
 
     getMobileApp()
 

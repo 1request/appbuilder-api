@@ -66,7 +66,11 @@
       return MobileApp.findOne({
         appKey: req.params.appKey
       }).lean().exec(function(error, mobileApp) {
-        return getTags(mobileApp);
+        if (error) {
+          return res.send(error);
+        } else {
+          return getTags(mobileApp);
+        }
       });
     };
     getTags = function(mobileApp) {
@@ -78,8 +82,12 @@
         }
       }).lean().exec(function(error, tags) {
         var beaconIds;
-        beaconIds = _.uniq(_.flatten(_.pluck(tags, 'beacons')));
-        return getBeacons(beaconIds);
+        if (error) {
+          return res.send(error);
+        } else {
+          beaconIds = _.uniq(_.flatten(_.pluck(tags, 'beacons')));
+          return getBeacons(beaconIds);
+        }
       });
     };
     getBeacons = function(beacons) {
