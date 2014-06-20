@@ -26,7 +26,7 @@
 
   app.use(bodyParser.json());
 
-  port = process.env.PORT || 4000;
+  port = process.env.PORT || 8080;
 
   router = express.Router();
 
