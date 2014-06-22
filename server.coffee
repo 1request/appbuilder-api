@@ -5,7 +5,9 @@ Log         = require './app/models/log'
 MobileApp   = require './app/models/mobile_app'
 Beacon      = require './app/models/beacon'
 Tag         = require './app/models/tag'
+Contact     = require './app/models/contact'
 _           = require 'lodash-node'
+
 app = express()
 
 mongoose.connect 'mongodb://localhost:27017/meteor-test'
@@ -38,6 +40,19 @@ router.route '/logs'
       if error
         res.send error
       res.json {message: 'Log created!'}
+
+router.route '/contacts'
+  .post (req, res) ->
+    contact           = new Contact()
+    contact._id       = mongoose.Types.ObjectId().toHexString()
+    contact.name      = req.body.name
+    contact.email     = req.body.email
+    contact.message   = req.body.message
+
+    contact.save (error) ->
+      if error
+        res.send error
+      res.json {message: 'contact created!'}
 
 router.route '/mobile_apps/:appKey'
   .get (req, res) ->
