@@ -1,6 +1,8 @@
 mongoose  = require 'mongoose'
 Schema    = mongoose.Schema
 
+appBuilderConn = mongoose.createConnection 'mongodb://localhost:27017/meteor-test'
+
 TagSchema = new Schema
   _id:        false
   text:       String
@@ -11,4 +13,4 @@ TagSchema = new Schema
   createdAt:  Number
   updatedAt:  Number
 
-module.exports = mongoose.model 'Tag', TagSchema
+module.exports = appBuilderConn.model 'Tag', TagSchema

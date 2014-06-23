@@ -10,12 +10,8 @@ _           = require 'lodash-node'
 
 app = express()
 
-mongoose.connect 'mongodb://localhost:27017/meteor-test'
-
 app.use bodyParser.urlencoded()
 app.use bodyParser.json()
-
-
 
 port = process.env.PORT || 8080
 

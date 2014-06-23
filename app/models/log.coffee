@@ -1,6 +1,8 @@
 mongoose  = require 'mongoose'
 Schema    = mongoose.Schema
 
+appBuilderConn = mongoose.createConnection 'mongodb://localhost:27017/meteor-test'
+
 LogSchema = new Schema
   _id:      false
   uuid:     String
@@ -9,4 +11,4 @@ LogSchema = new Schema
   deviceId: String
   time:     Number
 
-module.exports = mongoose.model 'Log', LogSchema
+module.exports = appBuilderConn.model 'Log', LogSchema
