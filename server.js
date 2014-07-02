@@ -55,7 +55,9 @@
     log.major = req.body.major;
     log.minor = req.body.minor;
     log.deviceId = req.body.deviceId;
+    log.appKey = req.body.appKey;
     log.time = req.body.time;
+    console.log('log: ', log);
     return log.save(function(error) {
       if (error) {
         res.send(error);

@@ -36,7 +36,9 @@ router.route '/logs'
     log.major     = req.body.major
     log.minor     = req.body.minor
     log.deviceId  = req.body.deviceId
+    log.appKey    = req.body.appKey
     log.time      = req.body.time
+    console.log 'log: ', log
 
     log.save (error) ->
       if error
