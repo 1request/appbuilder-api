@@ -6,7 +6,7 @@
 
   Schema = mongoose.Schema;
 
-  appBuilderConn = mongoose.createConnection('mongodb://localhost:27017/meteor');
+  appBuilderConn = mongoose.createConnection('mongodb://localhost:27017/meteor-test');
 
   LogSchema = new Schema({
     _id: false,

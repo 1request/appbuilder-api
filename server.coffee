@@ -44,6 +44,10 @@ router.route '/logs'
       if error
         res.send error
       res.json {message: 'Log created!'}
+  .get (req, res) ->
+    Log.find (error, logs) ->
+      console.log 'logs: ', logs
+      if error then res.send error else res.json { logs: logs }
 
 router.route '/contacts'
   .post (req, res) ->

@@ -66,6 +66,17 @@
         message: 'Log created!'
       });
     });
+  }).get(function(req, res) {
+    return Log.find(function(error, logs) {
+      console.log('logs: ', logs);
+      if (error) {
+        return res.send(error);
+      } else {
+        return res.json({
+          logs: logs
+        });
+      }
+    });
   });
 
   router.route('/contacts').post(function(req, res) {
