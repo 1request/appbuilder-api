@@ -1,15 +1,18 @@
-express     = require 'express'
-bodyParser  = require 'body-parser'
-mongoose    = require 'mongoose'
-Log         = require './app/models/log'
-MobileApp   = require './app/models/mobile_app'
-Beacon      = require './app/models/beacon'
-Zone        = require './app/models/zone'
-Contact     = require './app/models/contact'
-Notification = require './app/models/notification'
-_           = require 'lodash-node'
-Q           = require 'q'
-util        = require 'util'
+express       = require 'express'
+bodyParser    = require 'body-parser'
+mongoose      = require 'mongoose'
+_             = require 'lodash-node'
+Q             = require 'q'
+util          = require 'util'
+
+Log           = require './app/models/log'
+MobileApp     = require './app/models/mobile_app'
+Beacon        = require './app/models/beacon'
+Zone          = require './app/models/zone'
+Contact       = require './app/models/contact'
+Notification  = require './app/models/notification'
+PushToken     = require './app/models/push_token'
+
 app = express()
 
 app.use bodyParser.urlencoded()
@@ -45,9 +48,6 @@ router.route '/logs'
       if error
         res.send error
       res.json {message: 'Log created!'}
-  .get (req, res) ->
-    Log.find (error, logs) ->
-      if error then res.send error else res.json { logs: logs }
 
 router.route '/contacts'
   .post (req, res) ->
@@ -107,6 +107,22 @@ router.route '/mobile_apps/:appKey'
         _.pick(beacon, ['uuid', 'major', 'minor', 'actions'])
 
       res.json { beacons: beacons }
+
+router.route '/push_tokens'
+  .post (req, res) ->
+    pushToken           = new PushToken()
+    pushToken._id       = mongoose.Types.ObjectId().toHexString()
+    pushToken.appKey    = req.body.appKey
+    pushToken.deviceId  = req.body.deviceId
+    pushToken.pushType  = req.body.pushType
+    pushToken.pushToken = req.body.pushToken
+    pushToken.createdAt = new Date().valueOf()
+
+    pushToken.save (error) ->
+      if error
+        res.send error
+      res.json {message: 'Push token created!'}
+
 
 app.use '/api', router
 
