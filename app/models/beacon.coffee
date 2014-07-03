@@ -1,7 +1,7 @@
-mongoose  = require 'mongoose'
-common    = require '../../common'
-config    = common.config()
-Schema    = mongoose.Schema
+mongoose        = require 'mongoose'
+common          = require '../../common'
+config          = common.config()
+Schema          = mongoose.Schema
 
 appBuilderConn = mongoose.createConnection config.mongo_path
 
@@ -11,9 +11,9 @@ BeaconSchema = new Schema
   uuid:       String
   major:      Number
   minor:      Number
-  tags:
+  zones:
     type: String
-    ref:  'Tag'
+    ref:  'Zone'
   notes:      String
   createdAt:  Number
   updatedAt:  Number

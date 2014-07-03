@@ -5,7 +5,7 @@ Schema    = mongoose.Schema
 
 appBuilderConn = mongoose.createConnection config.mongo_path
 
-TagSchema = new Schema
+ZoneSchema = new Schema
   _id:        false
   text:       String
   beacons:
@@ -15,4 +15,4 @@ TagSchema = new Schema
   createdAt:  Number
   updatedAt:  Number
 
-module.exports = appBuilderConn.model 'Tag', TagSchema
+module.exports = appBuilderConn.model 'Zone', ZoneSchema

@@ -5,17 +5,15 @@ Schema    = mongoose.Schema
 
 appBuilderConn = mongoose.createConnection config.mongo_path
 
-MobileAppSchema = new Schema
+NotificationSchema = new Schema
   _id:        false
-  userId:     String
-  title:      String
-  imageUrls:  Array
   appKey:     String
-  zones:
+  message:    String
+  type:       String
+  action:     String
+  zone:
     type: String
     ref:  'Zone'
   createdAt:  Number
-  updatedAt:  Number
-, collection: 'mobileApps'
 
-module.exports = appBuilderConn.model 'MobileApp', MobileAppSchema
+module.exports = appBuilderConn.model 'Notification', NotificationSchema
