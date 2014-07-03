@@ -1,7 +1,7 @@
-mongoose  = require 'mongoose'
-common    = require '../../common'
-config    = common.config()
-Schema    = mongoose.Schema
+mongoose        = require 'mongoose'
+common          = require '../../common'
+config          = common.config()
+Schema          = mongoose.Schema
 
 appBuilderConn = mongoose.createConnection config.mongo_path
 

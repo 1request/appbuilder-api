@@ -6,8 +6,10 @@ MobileApp   = require './app/models/mobile_app'
 Beacon      = require './app/models/beacon'
 Zone        = require './app/models/zone'
 Contact     = require './app/models/contact'
+Notification = require './app/models/notification'
 _           = require 'lodash-node'
-
+Q           = require 'q'
+util        = require 'util'
 app = express()
 
 app.use bodyParser.urlencoded()
@@ -38,7 +40,6 @@ router.route '/logs'
     log.deviceId  = req.body.deviceId
     log.appKey    = req.body.appKey
     log.time      = req.body.time
-    console.log 'log: ', log
 
     log.save (error) ->
       if error
@@ -46,7 +47,6 @@ router.route '/logs'
       res.json {message: 'Log created!'}
   .get (req, res) ->
     Log.find (error, logs) ->
-      console.log 'logs: ', logs
       if error then res.send error else res.json { logs: logs }
 
 router.route '/contacts'
@@ -64,37 +64,49 @@ router.route '/contacts'
 
 router.route '/mobile_apps/:appKey'
   .get (req, res) ->
-    getMobileApp = () ->
-      MobileApp
-        .findOne({ appKey: req.params.appKey })
-        .lean()
-        .exec (error, mobileApp) ->
-          if error then res.send error else getZones(mobileApp)
+    d = Q.defer()
+
+    getMobileApp = MobileApp
+      .findOne(appKey: req.params.appKey)
+      .lean()
+      .select('zones')
+      .exec()
 
     getZones = (mobileApp) ->
-      zones = mobileApp.zones
-      if zones
-        Zone
-          .find({_id: { $in: zones } })
-          .lean()
-          .exec (error, zones) ->
-            if error
-              res.send error
-            else
-              beaconIds = _.uniq(_.flatten(_.pluck zones, 'beacons'))
-              getBeacons(beaconIds)
-      else
-        res.json({message: 'no beacon is set for this app'})
-
-    getBeacons = (beacons) ->
-      Beacon
-        .find({ _id: { $in: beacons } })
+      Zone
+        .where('_id').in(mobileApp.zones)
         .lean()
-        .select('uuid major minor -_id')
-        .exec (error, beacons) ->
-          if error then res.send error else res.json { beacons: beacons }
+        .exec()
 
-    getMobileApp()
+    getBeacons = (zones) ->
+      Beacon
+        .where('zones').in(zones)
+        .lean()
+        .select('uuid major minor zones _id')
+        .exec()
+
+    getNotifications = Notification
+      .where('appKey').equals(req.params.appKey)
+      .where('type').equals('location')
+      .lean()
+      .select('action url zone')
+      .exec()
+
+    Q.all([getMobileApp.then(getZones).then(getBeacons), getNotifications]).spread (beacons, notifications) ->
+      for n in notifications
+        filteredBeacons = _.where(beacons, { zones: [n.zone]})
+        for b in filteredBeacons
+          idx = _.findIndex beacons, (beacon) ->
+            b._id is beacon._id
+          unless !!b.actions
+            beacons[idx] = _.extend b, { actions: [action: n.action, url: n.url] }
+          else
+            b.actions.push {action: n.action, url: n.url}
+            beacons[idx] = b
+      beacons = _.map beacons, (beacon) ->
+        _.pick(beacon, ['uuid', 'major', 'minor', 'actions'])
+
+      res.json { beacons: beacons }
 
 app.use '/api', router
 
