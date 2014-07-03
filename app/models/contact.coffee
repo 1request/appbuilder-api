@@ -1,7 +1,9 @@
 mongoose  = require 'mongoose'
+common    = require '../../common'
+config    = common.config()
 Schema    = mongoose.Schema
 
-contactsConn   = mongoose.createConnection 'mongodb://localhost:27017/contacts'
+contactsConn   = mongoose.createConnection config.mongo_path
 
 ContactSchema = new Schema
   _id:        false

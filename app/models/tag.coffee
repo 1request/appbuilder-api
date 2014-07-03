@@ -1,7 +1,9 @@
 mongoose  = require 'mongoose'
+common    = require '../../common'
+config    = common.config()
 Schema    = mongoose.Schema
 
-appBuilderConn = mongoose.createConnection 'mongodb://localhost:27017/meteor-test'
+appBuilderConn = mongoose.createConnection config.mongo_path
 
 TagSchema = new Schema
   _id:        false
