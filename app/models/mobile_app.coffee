@@ -11,9 +11,9 @@ MobileAppSchema = new Schema
   title:      String
   imageUrls:  Array
   appKey:     String
-  tags:
+  zones:
     type: String
-    ref:  'Tag'
+    ref:  'Zone'
   createdAt:  Number
   updatedAt:  Number
 , collection: 'mobileApps'

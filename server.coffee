@@ -4,7 +4,7 @@ mongoose    = require 'mongoose'
 Log         = require './app/models/log'
 MobileApp   = require './app/models/mobile_app'
 Beacon      = require './app/models/beacon'
-Tag         = require './app/models/tag'
+Zone        = require './app/models/zone'
 Contact     = require './app/models/contact'
 _           = require 'lodash-node'
 
@@ -69,19 +69,19 @@ router.route '/mobile_apps/:appKey'
         .findOne({ appKey: req.params.appKey })
         .lean()
         .exec (error, mobileApp) ->
-          if error then res.send error else getTags(mobileApp)
+          if error then res.send error else getZones(mobileApp)
 
-    getTags = (mobileApp) ->
-      tags = mobileApp.tags
-      if tags
-        Tag
-          .find({_id: { $in: tags } })
+    getZones = (mobileApp) ->
+      zones = mobileApp.zones
+      if zones
+        Zone
+          .find({_id: { $in: zones } })
           .lean()
-          .exec (error, tags) ->
+          .exec (error, zones) ->
             if error
               res.send error
             else
-              beaconIds = _.uniq(_.flatten(_.pluck tags, 'beacons'))
+              beaconIds = _.uniq(_.flatten(_.pluck zones, 'beacons'))
               getBeacons(beaconIds)
       else
         res.json({message: 'no beacon is set for this app'})

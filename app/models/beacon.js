@@ -18,9 +18,9 @@
     uuid: String,
     major: Number,
     minor: Number,
-    tags: {
+    zones: {
       type: String,
-      ref: 'Tag'
+      ref: 'Zone'
     },
     notes: String,
     createdAt: Number,
