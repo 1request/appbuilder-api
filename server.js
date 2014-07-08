@@ -93,32 +93,33 @@
   });
 
   router.route('/mobile_apps/:appKey').get(function(req, res) {
-    var d, getBeacons, getMobileApp, getNotifications, getZones;
+    var d, getBeacons, getNotifications;
     d = Q.defer();
-    getMobileApp = MobileApp.findOne({
-      appKey: req.params.appKey
-    }).lean().select('zones').exec();
-    getZones = function(mobileApp) {
-      return Zone.where('_id')["in"](mobileApp.zones).lean().exec();
-    };
-    getBeacons = function(zones) {
-      return Beacon.where('zones')["in"](zones).lean().select('uuid major minor zones _id').exec();
-    };
     getNotifications = Notification.where('appKey').equals(req.params.appKey).where('type').equals('location').lean().select('action url zone').exec();
-    return Q.all([getMobileApp.then(getZones).then(getBeacons), getNotifications]).spread(function(beacons, notifications) {
-      var b, filteredBeacons, idx, n, _i, _j, _len, _len1;
-      for (_i = 0, _len = notifications.length; _i < _len; _i++) {
-        n = notifications[_i];
-        filteredBeacons = _.where(beacons, {
+    getBeacons = function(notifications) {
+      var beacons, zoneIds;
+      d = Q.defer();
+      zoneIds = _.pluck(notifications, 'zone');
+      beacons = Beacon.where('zones')["in"](zoneIds).lean().select('uuid major minor zones _id').exec(function(error, result) {
+        return d.resolve({
+          notifications: notifications,
+          beacons: result
+        });
+      });
+      return d.promise;
+    };
+    return getNotifications.then(getBeacons).then(function(result) {
+      var b, beacons, n, _i, _j, _len, _len1, _ref;
+      _ref = result.notifications;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        n = _ref[_i];
+        beacons = _.where(result.beacons, {
           zones: [n.zone]
         });
-        for (_j = 0, _len1 = filteredBeacons.length; _j < _len1; _j++) {
-          b = filteredBeacons[_j];
-          idx = _.findIndex(beacons, function(beacon) {
-            return b._id === beacon._id;
-          });
+        for (_j = 0, _len1 = beacons.length; _j < _len1; _j++) {
+          b = beacons[_j];
           if (!b.actions) {
-            beacons[idx] = _.extend(b, {
+            b = _.extend(b, {
               actions: [
                 {
                   action: n.action,
@@ -131,11 +132,10 @@
               action: n.action,
               url: n.url
             });
-            beacons[idx] = b;
           }
         }
       }
-      beacons = _.map(beacons, function(beacon) {
+      beacons = _.map(result.beacons, function(beacon) {
         return _.pick(beacon, ['uuid', 'major', 'minor', 'actions']);
       });
       return res.json({

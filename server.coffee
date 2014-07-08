@@ -66,25 +66,6 @@ router.route '/mobile_apps/:appKey'
   .get (req, res) ->
     d = Q.defer()
 
-    getMobileApp = MobileApp
-      .findOne(appKey: req.params.appKey)
-      .lean()
-      .select('zones')
-      .exec()
-
-    getZones = (mobileApp) ->
-      Zone
-        .where('_id').in(mobileApp.zones)
-        .lean()
-        .exec()
-
-    getBeacons = (zones) ->
-      Beacon
-        .where('zones').in(zones)
-        .lean()
-        .select('uuid major minor zones _id')
-        .exec()
-
     getNotifications = Notification
       .where('appKey').equals(req.params.appKey)
       .where('type').equals('location')
@@ -92,21 +73,32 @@ router.route '/mobile_apps/:appKey'
       .select('action url zone')
       .exec()
 
-    Q.all([getMobileApp.then(getZones).then(getBeacons), getNotifications]).spread (beacons, notifications) ->
-      for n in notifications
-        filteredBeacons = _.where(beacons, { zones: [n.zone]})
-        for b in filteredBeacons
-          idx = _.findIndex beacons, (beacon) ->
-            b._id is beacon._id
-          unless !!b.actions
-            beacons[idx] = _.extend b, { actions: [action: n.action, url: n.url] }
-          else
-            b.actions.push {action: n.action, url: n.url}
-            beacons[idx] = b
-      beacons = _.map beacons, (beacon) ->
-        _.pick(beacon, ['uuid', 'major', 'minor', 'actions'])
+    getBeacons = (notifications) ->
+      d = Q.defer()
+      zoneIds = _.pluck(notifications, 'zone')
+      beacons = Beacon
+        .where('zones').in(zoneIds)
+        .lean()
+        .select('uuid major minor zones _id')
+        .exec (error, result) ->
+          d.resolve {notifications: notifications, beacons: result}
+      d.promise
 
-      res.json { beacons: beacons }
+    getNotifications
+      .then(getBeacons)
+      .then (result) ->
+        for n in result.notifications
+          beacons = _.where(result.beacons, zones: [n.zone])
+          for b in beacons
+            unless !!b.actions
+              b = _.extend b, { actions: [action: n.action, url: n.url]}
+            else
+              b.actions.push { action: n.action, url: n.url }
+
+        beacons = _.map result.beacons, (beacon) ->
+          _.pick(beacon, ['uuid', 'major', 'minor', 'actions'])
+
+        res.json { beacons: beacons }
 
 router.route '/push_tokens'
   .post (req, res) ->
