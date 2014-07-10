@@ -70,7 +70,7 @@ router.route '/mobile_apps/:appKey'
       .where('appKey').equals(req.params.appKey)
       .where('type').equals('location')
       .lean()
-      .select('action url zone')
+      .select('action url zone trigger message')
       .exec()
 
     getBeacons = (notifications) ->
@@ -89,11 +89,17 @@ router.route '/mobile_apps/:appKey'
       .then (result) ->
         for n in result.notifications
           beacons = _.where(result.beacons, zones: [n.zone])
+          attributes =
+            trigger: n.trigger
+            action: n.action
+            message: n.message
+            url: n.url
           for b in beacons
             unless !!b.actions
-              b = _.extend b, { actions: [action: n.action, url: n.url]}
+              b = _.extend b,
+                actions: [attributes]
             else
-              b.actions.push { action: n.action, url: n.url }
+              b.actions.push attributes
 
         beacons = _.map result.beacons, (beacon) ->
           _.pick(beacon, ['uuid', 'major', 'minor', 'actions'])

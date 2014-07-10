@@ -11,6 +11,7 @@ NotificationSchema = new Schema
   message:    String
   type:       String
   action:     String
+  trigger:    String
   zone:
     type: String
     ref:  'Zone'

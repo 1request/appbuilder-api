@@ -95,7 +95,7 @@
   router.route('/mobile_apps/:appKey').get(function(req, res) {
     var d, getBeacons, getNotifications;
     d = Q.defer();
-    getNotifications = Notification.where('appKey').equals(req.params.appKey).where('type').equals('location').lean().select('action url zone').exec();
+    getNotifications = Notification.where('appKey').equals(req.params.appKey).where('type').equals('location').lean().select('action url zone trigger message').exec();
     getBeacons = function(notifications) {
       var beacons, zoneIds;
       d = Q.defer();
@@ -109,29 +109,27 @@
       return d.promise;
     };
     return getNotifications.then(getBeacons).then(function(result) {
-      var b, beacons, n, _i, _j, _len, _len1, _ref;
+      var attributes, b, beacons, n, _i, _j, _len, _len1, _ref;
       _ref = result.notifications;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         n = _ref[_i];
         beacons = _.where(result.beacons, {
           zones: [n.zone]
         });
+        attributes = {
+          trigger: n.trigger,
+          action: n.action,
+          message: n.message,
+          url: n.url
+        };
         for (_j = 0, _len1 = beacons.length; _j < _len1; _j++) {
           b = beacons[_j];
           if (!b.actions) {
             b = _.extend(b, {
-              actions: [
-                {
-                  action: n.action,
-                  url: n.url
-                }
-              ]
+              actions: [attributes]
             });
           } else {
-            b.actions.push({
-              action: n.action,
-              url: n.url
-            });
+            b.actions.push(attributes);
           }
         }
       }
