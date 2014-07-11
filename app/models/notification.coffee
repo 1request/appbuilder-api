@@ -15,6 +15,7 @@ NotificationSchema = new Schema
   zone:
     type: String
     ref:  'Zone'
+  area:       String
   createdAt:  Number
 
 module.exports = appBuilderConn.model 'Notification', NotificationSchema

@@ -95,7 +95,7 @@
   router.route('/mobile_apps/:appKey').get(function(req, res) {
     var d, getBeacons, getNotifications;
     d = Q.defer();
-    getNotifications = Notification.where('appKey').equals(req.params.appKey).where('type').equals('location').lean().select('action url zone trigger message').exec();
+    getNotifications = Notification.where('appKey').equals(req.params.appKey).where('type').equals('location').lean().select('action url zone trigger message area').exec();
     getBeacons = function(notifications) {
       var beacons, zoneIds;
       d = Q.defer();
@@ -119,6 +119,7 @@
         attributes = {
           trigger: n.trigger,
           action: n.action,
+          area: n.area,
           message: n.message,
           url: n.url
         };

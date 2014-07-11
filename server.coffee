@@ -70,7 +70,7 @@ router.route '/mobile_apps/:appKey'
       .where('appKey').equals(req.params.appKey)
       .where('type').equals('location')
       .lean()
-      .select('action url zone trigger message')
+      .select('action url zone trigger message area')
       .exec()
 
     getBeacons = (notifications) ->
@@ -92,6 +92,7 @@ router.route '/mobile_apps/:appKey'
           attributes =
             trigger: n.trigger
             action: n.action
+            area: n.area
             message: n.message
             url: n.url
           for b in beacons

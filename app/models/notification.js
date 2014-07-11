@@ -23,6 +23,7 @@
       type: String,
       ref: 'Zone'
     },
+    area: String,
     createdAt: Number
   });
 
