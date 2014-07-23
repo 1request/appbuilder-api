@@ -9,6 +9,7 @@ Log           = require './app/models/log'
 MobileApp     = require './app/models/mobile_app'
 Beacon        = require './app/models/beacon'
 Zone          = require './app/models/zone'
+Area          = require './app/models/area'
 Contact       = require './app/models/contact'
 Notification  = require './app/models/notification'
 PushToken     = require './app/models/push_token'
@@ -62,6 +63,7 @@ router.route '/contacts'
         res.send error
       res.json {message: 'contact created!'}
 
+
 router.route '/mobile_apps/:appKey'
   .get (req, res) ->
     d = Q.defer()
@@ -84,17 +86,26 @@ router.route '/mobile_apps/:appKey'
           d.resolve {notifications: notifications, beacons: result}
       d.promise
 
-    getNotifications
-      .then(getBeacons)
+    getAreas = Area
+      .where('appKey').equals(req.params.appKey)
+      .lean()
+      .select('name url')
+      .exec()
+
+    Q.all([getNotifications, getAreas])
+    .spread (notifications, areas) ->
+      getBeacons(notifications)
       .then (result) ->
         for n in result.notifications
+          area = _.find(areas, {_id: n.area})
           beacons = _.where(result.beacons, zones: [n.zone])
           attributes =
             trigger: n.trigger
             action: n.action
-            area: n.area
             message: n.message
             url: n.url
+          if !!area then _.extend attributes,
+            area: area.name
           for b in beacons
             unless !!b.actions
               b = _.extend b,
@@ -105,7 +116,11 @@ router.route '/mobile_apps/:appKey'
         beacons = _.map result.beacons, (beacon) ->
           _.pick(beacon, ['uuid', 'major', 'minor', 'actions'])
 
-        res.json { beacons: beacons }
+        areas = _.map areas, (area) ->
+          _.pick(area, ['name', 'url'])
+        res.json
+          beacons: beacons
+          areas: areas
 
 router.route '/push_tokens'
   .post (req, res) ->
