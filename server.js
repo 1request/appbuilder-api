@@ -131,7 +131,7 @@
           };
           if (!!area) {
             _.extend(attributes, {
-              area: area.name
+              area: area.position
             });
           }
           for (_j = 0, _len1 = beacons.length; _j < _len1; _j++) {

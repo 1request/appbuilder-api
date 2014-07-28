@@ -105,7 +105,7 @@ router.route '/mobile_apps/:appKey'
             message: n.message
             url: n.url
           if !!area then _.extend attributes,
-            area: area.name
+            area: area.position
           for b in beacons
             unless !!b.actions
               b = _.extend b,
