@@ -110,7 +110,7 @@
       });
       return d.promise;
     };
-    getAreas = Area.where('appKey').equals(req.params.appKey).lean().select('name url').exec();
+    getAreas = Area.where('appKey').equals(req.params.appKey).lean().select('name position url').exec();
     return Q.all([getNotifications, getAreas]).spread(function(notifications, areas) {
       return getBeacons(notifications).then(function(result) {
         var area, attributes, b, beacons, n, _i, _j, _len, _len1, _ref;
@@ -149,7 +149,7 @@
           return _.pick(beacon, ['uuid', 'major', 'minor', 'actions']);
         });
         areas = _.map(areas, function(area) {
-          return _.pick(area, ['name', 'url']);
+          return _.pick(area, ['name', 'position', 'url']);
         });
         return res.json({
           beacons: beacons,

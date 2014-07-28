@@ -8,8 +8,10 @@ appBuilderConn = mongoose.createConnection config.mongo_path
 AreaSchema = new Schema
   _id:        false
   name:       String
-  imageId:    String
+  image:      String
+  position:   String
   appKey:     String
+  url:        String
   createdAt:  Number
   updatedAt:  Number
 

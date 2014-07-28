@@ -89,7 +89,7 @@ router.route '/mobile_apps/:appKey'
     getAreas = Area
       .where('appKey').equals(req.params.appKey)
       .lean()
-      .select('name url')
+      .select('name position url')
       .exec()
 
     Q.all([getNotifications, getAreas])
@@ -117,7 +117,7 @@ router.route '/mobile_apps/:appKey'
           _.pick(beacon, ['uuid', 'major', 'minor', 'actions'])
 
         areas = _.map areas, (area) ->
-          _.pick(area, ['name', 'url'])
+          _.pick(area, ['name', 'position', 'url'])
         res.json
           beacons: beacons
           areas: areas
@@ -136,7 +136,6 @@ router.route '/push_tokens'
       if error
         res.send error
       res.json {message: 'Push token created!'}
-
 
 app.use '/api', router
 
